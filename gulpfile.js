@@ -1,6 +1,8 @@
 var elixir = require('laravel-elixir');
 require('laravel-elixir-ng-annotate');
 
+var gulp = require('gulp');
+var templateCache = require('gulp-angular-templatecache');
 /*
  |--------------------------------------------------------------------------
  | Elixir Asset Management
@@ -11,6 +13,22 @@ require('laravel-elixir-ng-annotate');
  | file for our application, as well as publishing vendor resources.
  |
  */
+
+var Task = elixir.Task;
+
+elixir.extend('templateCache', function() {
+
+    new Task('templateCache', function() {
+        return gulp.task('templateCache', function () {
+            return gulp.src('resources/assets/js/**/*.html')
+                .pipe(templateCache('templateCache.js', { module:'app'}))
+                .pipe(gulp.dest('resources/assets/js/'));
+        });
+
+    }).watch('resources/assets/js/**/*.html');
+
+});
+
 
 elixir.config.sourcemaps = true;
 
@@ -23,7 +41,7 @@ elixir(function(mix) {
         "/bootstrap-material-design/dist/js/ripples.min.js",
         "/lodash/lodash.min.js",
         "/angular/angular.min.js",
-        "/angular-route/angular-route.min.js",
+        "/angular-ui-router/release/angular-ui-router.min.js",
         "/angular-resource/angular-resource.min.js",
         "/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js",
         "/angular-animate/angular-animate.min.js",
@@ -39,9 +57,13 @@ elixir(function(mix) {
         "/resources/assets/js/**/*.js"
     ];
 
+    mix.templateCache();
+
     mix.scripts(dependenciesScripts, "public/js/dependencies.js", "node_modules");
     mix.annotate(appScripts);
     mix.scripts('annotated.js','public/js/app.js', 'public/js/');
+
+    mix.copy('resources/assets/js/**/*.html', 'public/js/');
 
     mix.styles([
         "/bootstrap/dist/css/bootstrap.min.css",
@@ -54,9 +76,9 @@ elixir(function(mix) {
         "/pnotify/dist/pnotify.css",
         "/pnotify/dist/pnotify.brighttheme.css"
     ], 'public/css/dependencies.css', 'node_modules')
-    .sass('app.scss')
-    .browserSync({
+    .sass('app.scss');
+
+    mix.browserSync({
         proxy: 'trello.dev'
     });
-
 });

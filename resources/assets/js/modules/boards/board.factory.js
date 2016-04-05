@@ -1,36 +1,47 @@
-/* @ngInject */
+'use strict';
 
-angular.module('app').factory('boardsFactory', function($http) {
+/* @ngInject */
+angular
+    .module('app')
+    .factory('BoardsFactory', BoardsFactory );
+
+function BoardsFactory($http) {
 
     var board = this;
     this.boardList = {};
 
-    board.getBoards = function() {
+    board.getBoards = getBoards;
+    board.createBoard = createBoard;
+    board.editBoard = editBoard;
+    board.updateBoard = updateBoard;
+    board.deleteBoard = deleteBoard;
+
+    return board;
+
+    function getBoards() {
         return $http.get('/api/boards')
             .then(function(rec) {
                 board.boardList = rec.data;
                 return rec.data;
             });
-    };
+    }
 
-    board.createBoard = function(board) {
+    function createBoard(board) {
         return $http.post('/api/boards', board);
-    };
+    }
 
-    board.editBoard = function(id) {
+    function editBoard(id) {
         return $http.get('/api/boards/' + id + '/edit')
             .then(function(rec) {
                 return rec.data;
             });
-    };
+    }
 
-    board.updateBoard = function(id, board) {
+    function updateBoard(id, board) {
         return $http.put('/api/boards/' + id, board);
-    };
+    }
 
-    board.deleteBoard = function(id) {
+    function deleteBoard(id) {
         return $http.delete('/api/boards/' + id)
-    };
-
-    return board;
-});
+    }
+}

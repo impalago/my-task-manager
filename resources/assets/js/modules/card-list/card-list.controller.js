@@ -1,9 +1,20 @@
+'use strict';
+
 /* @ngInject */
+angular
+    .module('app')
+    .controller('cardListCtrl', cardListCtrl);
 
-angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $routeParams, cardListFactory, cfpLoadingBar) {
+function cardListCtrl($scope, $uibModal, $stateParams, cardListFactory, cfpLoadingBar) {
 
-    var $self = this;
-    $scope.init = function() {
+    $scope.cardList = cardList;
+    $scope.createCardList = createCardList;
+    $scope.editCardList = editCardList;
+    $scope.deleteCardList = deleteCardList;
+
+    activate();
+
+    function activate() {
         $scope.cardList();
 
         $scope.loadStart = function() {
@@ -16,37 +27,29 @@ angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $ro
 
         $scope.loadStart();
         $scope.fakeIntro = true;
-    };
+    }
 
-    $scope.printArray = function(arr){
-        return '[' + arr.toString().replace(/([^,]+)/g, '"$1"').replace(/,/g, ', ') + ']';
-    };
+    $scope.$watchCollection('allCardList', function(newArr, oldArr) {
+        cardListFactory.watchAllCardList(newArr);
+    });
 
-    $scope.cardList = function() {
+    function cardList() {
         cardListFactory.getAllCardList()
             .then(function(rec) {
-                $self.allCardList = rec;
                 $scope.allCardList = rec;
                 $scope.loadComplete();
                 $scope.fakeIntro = false;
             });
-    };
+    }
 
-    $scope.$watchCollection('allCardList', function(newArr, oldArr) {
-        cardListFactory.watchAllCardList(newArr)
-            .then(function() {
-
-            });
-    });
-
-    $self.createCardList = function() {
+    function createCardList() {
         var modalInstance = $uibModal.open({
             templateUrl: '/api/card-list-create-form',
             controller: function($scope, $uibModalInstance) {
-                $scope.formTitle = 'Create card list';
+                $scope.formTitle = 'Create card listqqqqqq';
                 $scope.cardListSubmit = function() {
                     if($scope.cardListForm.$valid) {
-                        $scope.cardListFields.board_id = $routeParams.id;
+                        $scope.cardListFields.board_id = $stateParams.id;
                         cardListFactory.createCardList($scope.cardListFields)
                             .then(function() {
                                 $uibModalInstance.close();
@@ -62,9 +65,9 @@ angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $ro
         modalInstance.result.then(function() {
             $scope.cardList();
         });
-    };
+    }
 
-    $self.editCardList = function(id) {
+    function editCardList(id) {
         var modalInstance = $uibModal.open({
             templateUrl: '/api/card-list-create-form',
             controller: function($scope, $uibModalInstance) {
@@ -76,7 +79,7 @@ angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $ro
                         $scope.colorcardListColor = rec.color;
                         $scope.cardListSubmit = function() {
                             if($scope.cardListFields.name != rec.name || $scope.cardListFields.color) {
-                                $scope.cardListFields.board_id = $routeParams.id;
+                                $scope.cardListFields.board_id = $stateParams.id;
                                 $scope.cardListFields.name = !$scope.cardListFields.name ? rec.name : $scope.cardListFields.name;
                                 $scope.cardListFields.color = !$scope.cardListFields.color ? rec.color : $scope.cardListFields.color;
                                 cardListFactory.updateCardList(id, $scope.cardListFields)
@@ -99,9 +102,9 @@ angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $ro
         modalInstance.result.then(function() {
             $scope.cardList();
         });
-    };
+    }
 
-    $self.deleteCardList = function(id) {
+    function deleteCardList(id) {
         $.confirm({
             title: 'Are you sure?',
             confirm: function(){
@@ -117,7 +120,7 @@ angular.module('app').controller('cardListCtrl', function($scope, $uibModal, $ro
                     });
             }
         });
-    };
+    }
 
-    $scope.init();
-});
+
+}

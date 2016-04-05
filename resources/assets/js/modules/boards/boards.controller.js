@@ -1,12 +1,21 @@
+'use strict';
+
 /* @ngInject */
+angular
+    .module('app')
+    .controller('BoardsController', BoardsController);
 
-angular.module('app').controller('boardsCtrl', function($scope, boardsFactory, $uibModal, cfpLoadingBar) {
+function BoardsController($scope, BoardsFactory, $uibModal, cfpLoadingBar, $templateCache) {
 
-    $scope.init = function() {
-        $scope.allBoards();
-        $scope.board = {
-            name: ''
-        };
+    $scope.allBoards = allBoards;
+    $scope.createBoard = createBoard;
+    $scope.editBoard = editBoard;
+    $scope.deleteBoard = deleteBoard;
+
+    activate();
+
+    function activate() {
+        allBoards();
 
         $scope.loadStart = function() {
             cfpLoadingBar.start();
@@ -18,25 +27,25 @@ angular.module('app').controller('boardsCtrl', function($scope, boardsFactory, $
 
         $scope.loadStart();
         $scope.fakeIntro = true;
-    };
+    }
 
-    $scope.allBoards = function() {
-        boardsFactory.getBoards()
+    function allBoards() {
+        BoardsFactory.getBoards()
             .then(function(rec) {
-                $scope.boards = boardsFactory.boardList;
+                $scope.boards = BoardsFactory.boardList;
                 $scope.loadComplete();
                 $scope.fakeIntro = false;
             });
-    };
+    }
 
-    $scope.createBoard = function() {
+    function createBoard() {
         var modalInstance = $uibModal.open({
-            templateUrl: '/api/boards-create-form',
+            template: $templateCache.get("modules/boards/create-board-form.tpl.html"),
             controller: function($scope, $uibModalInstance) {
                 $scope.formTitle = 'Create board';
                 $scope.boardSubmit = function() {
                     if($scope.boardForm.$valid) {
-                        boardsFactory.createBoard($scope.board)
+                        BoardsFactory.createBoard($scope.board)
                             .then(function() {
                                 $uibModalInstance.close();
                             });
@@ -51,20 +60,20 @@ angular.module('app').controller('boardsCtrl', function($scope, boardsFactory, $
         modalInstance.result.then(function() {
             $scope.allBoards();
         });
-    };
+    }
 
-    $scope.editBoard = function(id) {
+    function editBoard(id) {
         var modalInstance = $uibModal.open({
-            templateUrl: '/api/boards-create-form',
+            template: $templateCache.get("modules/boards/create-board-form.tpl.html"),
             controller: function($scope, $uibModalInstance) {
                 $scope.formTitle = 'Edit board';
-                boardsFactory.editBoard(id)
+                BoardsFactory.editBoard(id)
                     .then(function(rec) {
 
                         $scope.boardName = rec.name;
                         $scope.boardSubmit = function() {
                             if($scope.boardForm.$valid) {
-                                boardsFactory.updateBoard(id, $scope.board)
+                                BoardsFactory.updateBoard(id, $scope.board)
                                     .then(function() {
                                         $uibModalInstance.close();
                                     });
@@ -82,14 +91,14 @@ angular.module('app').controller('boardsCtrl', function($scope, boardsFactory, $
         modalInstance.result.then(function() {
             $scope.allBoards();
         });
-    };
+    }
 
-    $scope.deleteBoard = function(id) {
+    function deleteBoard(id) {
         $.confirm({
             title: 'Are you sure?',
             content: 'The board to move to a basket!',
             confirm: function(){
-                boardsFactory.deleteBoard(id)
+                BoardsFactory.deleteBoard(id)
                     .then(function(rec) {
                         new PNotify({
                             title: 'Info',
@@ -101,7 +110,5 @@ angular.module('app').controller('boardsCtrl', function($scope, boardsFactory, $
                     });
             }
         });
-    };
-
-    $scope.init();
-});
+    }
+}

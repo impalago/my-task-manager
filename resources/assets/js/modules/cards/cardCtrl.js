@@ -9,7 +9,6 @@ angular.module('app').controller('cardCtrl', function($scope, cardFactory, $uibM
     };
 
     var cardListId = $('.card-list-item').data('card-list-id');
-    console.log(cardListId);
 
     $scope.getCards = function() {
 

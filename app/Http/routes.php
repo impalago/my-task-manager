@@ -40,19 +40,6 @@ Route::group(['middleware' => ['web', 'auth'], 'prefix' => 'api'], function () {
 
     // Templates
 
-    // Boards
-    Route::get('boards-main', function() {
-        return view('app_blocks/boards.index');
-    });
-    Route::get('boards-create-form', function() {
-        return view('app_blocks/boards.board-create-form');
-    });
-
-    // Board item
-    Route::get('boards-item', function() {
-        return view('app_blocks/board-item.index');
-    });
-
     // Card list
     Route::get('card-list-create-form', function() {
         return view('app_blocks/card-list.card-list-form');
